@@ -1,0 +1,6 @@
+minio:
+  accessKey: rybin
+  secretKey: 12345678
+  bucket: leadnews
+  endpoint: http://124.223.106.233:9000
+  readPath: http://124.223.106.233:9000
