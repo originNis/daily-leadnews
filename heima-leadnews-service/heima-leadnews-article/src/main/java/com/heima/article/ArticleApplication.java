@@ -19,6 +19,12 @@ public class ArticleApplication {
         SpringApplication.run(ArticleApplication.class,args);
     }
 
+    /**
+     * 为使用MyBatisPlus附带的分页功能，
+     * 必须启动MybatisPlusInterceptor，
+     * 并添加PaginationInnerInterceptor拦截器
+     * @return
+     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
