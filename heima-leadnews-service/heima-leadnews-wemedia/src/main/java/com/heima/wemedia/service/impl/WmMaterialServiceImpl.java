@@ -50,23 +50,26 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
 
         try {
             // 2.1根据后缀判断：上传图片
-            if (postFix.equals("png") || postFix.equals("jpg") || postFix.equals("jpeg")) {
+            // 注意：后缀可能会有大/小写
+            if (postFix.equalsIgnoreCase("png") || postFix.equalsIgnoreCase("jpg") || postFix.equalsIgnoreCase("jpeg")) {
                 fileName = fileStorageService.uploadImgFile("", fileName + "." + postFix, multipartFile.getInputStream());
+
+                // 3.文件URL存入数据库
+                WmMaterial wmMaterial = new WmMaterial();
+                wmMaterial.setUserId(WmThreadLocalUtil.get().getId());
+                wmMaterial.setUrl(fileName);
+                wmMaterial.setType((short) 0);
+                wmMaterial.setIsCollection((short) 0);
+                wmMaterial.setCreatedTime(new Date());
+                save(wmMaterial);
+
+                return ResponseResult.okResult(wmMaterial);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 3.文件URL存入数据库
-        WmMaterial wmMaterial = new WmMaterial();
-        wmMaterial.setUserId(WmThreadLocalUtil.get().getId());
-        wmMaterial.setUrl(fileName);
-        wmMaterial.setType((short) 0);
-        wmMaterial.setIsCollection((short) 0);
-        wmMaterial.setCreatedTime(new Date());
-        save(wmMaterial);
-
-        return ResponseResult.okResult(wmMaterial);
+        return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_IMAGE_FORMAT_ERROR);
     }
 
     /**
@@ -94,6 +97,9 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
         // 2.4.按照时间倒序查询
         queryWrapper.orderByDesc(WmMaterial::getCreatedTime);
 
+        // 2.5.根据博主id查询
+        queryWrapper.eq(WmMaterial::getUserId, WmThreadLocalUtil.get().getId());
+
         page = page(page, queryWrapper);
 
         ResponseResult responseResult = new PageResponseResult(
@@ -102,4 +108,6 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
 
         return responseResult;
     }
+
+
 }
