@@ -131,11 +131,40 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         // 不是草稿，则需要保存内容图片与素材的关系
         List<String> materialUrls = extractUrlInfo(wmNewsDto.getContent());
         saveRelationsBewteenNewsAndMaterials(materialUrls, wmNewsDto.getId(), wmNewsDto.getType());
+        // 保存封面图片
+        saveRelationInfoForCover(wmNewsDto, news, materialUrls);
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 
+    // 注释
+    private void saveRelationInfoForCover(WmNewsDto dto, WmNews news, List<String> materials) {
+        List<String> images = dto.getImages();
 
+        // 如果封面类型为自动，则重新设置封面类型
+        if (dto.getType().equals(WemediaConstants.WM_NEWS_TYPE_AUTO)) {
+            if (materials.size() >= 3) {
+                news.setType(WemediaConstants.WM_NEWS_MANY_IMAGES);
+                images = materials.stream().limit(3).collect(Collectors.toList());
+            } else if (materials.size() >= 1 && materials.size() < 3) {
+                news.setType(WemediaConstants.WM_NEWS_SINGLE_IMAGE);
+                images = materials.stream().limit(1).collect(Collectors.toList());
+            } else {
+                news.setType(WemediaConstants.WM_NEWS_NONE_IMAGE);
+            }
+
+            //if (images != null || images.size() > 0) {
+            //   news.setImages(images);
+            //}
+
+            updateById(news);
+        }
+
+        if (images != null || images.size() > 0) {
+            saveRelationsBewteenNewsAndMaterials(images, news.getId(), WemediaConstants.WM_NEWS_COVER_REFERENCE);
+        }
+    }
+    
     private void saveRelationsBewteenNewsAndMaterials(List<String> materialUrls, Integer newsId, Short type) {
         if (materialUrls != null && materialUrls.size() != 0) {
             List<WmMaterial> materials = wmMaterialMapper
