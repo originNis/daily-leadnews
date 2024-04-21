@@ -144,7 +144,7 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         // 如果封面类型为自动，则重新设置封面类型
         if (dto.getType().equals(WemediaConstants.WM_NEWS_TYPE_AUTO)) {
             if (materials.size() >= 3) {
-                news.setType(WemediaConstants.WM_NEWS_MANY_IMAGES);
+                news.setType(WemediaConstants.WM_NEWS_MANY_IMAGE);
                 images = materials.stream().limit(3).collect(Collectors.toList());
             } else if (materials.size() >= 1 && materials.size() < 3) {
                 news.setType(WemediaConstants.WM_NEWS_SINGLE_IMAGE);
@@ -161,7 +161,7 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         }
 
         if (images != null || images.size() > 0) {
-            saveRelationsBewteenNewsAndMaterials(images, news.getId(), WemediaConstants.WM_NEWS_COVER_REFERENCE);
+            saveRelationsBewteenNewsAndMaterials(images, news.getId(), WemediaConstants.WM_COVER_REFERENCE);
         }
     }
     
@@ -200,13 +200,14 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
      * @param news
      */
     private void updateWmNews(WmNews news) {
-        news.setUserId(WmThreadLocalUtil.get().getApUserId());
+        news.setUserId(WmThreadLocalUtil.get().getId());
         news.setCreatedTime(new Date());
         news.setSubmitedTime(new Date());
+        news.setPublishTime(new Date());
         news.setEnable((short) 1);
 
         // 新建文章，保存
-        if (news.getId() != null) {
+        if (news.getId() == null) {
             save(news);
         } else {
             // 修改文章

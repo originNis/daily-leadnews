@@ -77,7 +77,6 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
      * @param wmMaterialDto
      * @return
      */
-    @Override
     public ResponseResult findMaterialList(WmMaterialDto wmMaterialDto) {
         // 1.检查参数
         wmMaterialDto.checkParam();
@@ -108,6 +107,4 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
 
         return responseResult;
     }
-
-
 }
