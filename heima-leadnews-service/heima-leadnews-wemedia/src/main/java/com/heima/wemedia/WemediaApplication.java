@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @EnableDiscoveryClient
 @MapperScan("com.heima.wemedia.mapper")
+@EnableFeignClients(basePackages = "com.heima.apis")
 public class WemediaApplication {
 
     public static void main(String[] args) {
