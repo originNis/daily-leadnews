@@ -15,6 +15,7 @@ import com.heima.wemedia.service.WmUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -37,8 +38,9 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
      * To comment
      */
     @Override
-    public void autoScanWmNews(Integer articleId) {
-        WmNews wmNews = wmNewsMapper.selectById(articleId);
+    @Async
+    public void autoScanWmNews(Integer newsId) {
+        WmNews wmNews = wmNewsMapper.selectById(newsId);
         if (wmNews == null) {
             throw new RuntimeException("WmNewsAutoScanImpl - article don`t exist.");
         }
