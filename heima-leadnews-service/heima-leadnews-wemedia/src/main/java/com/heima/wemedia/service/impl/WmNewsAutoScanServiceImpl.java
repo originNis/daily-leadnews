@@ -10,13 +10,12 @@ import com.heima.wemedia.mapper.WmChannelMapper;
 import com.heima.wemedia.mapper.WmNewsMapper;
 import com.heima.wemedia.mapper.WmUserMapper;
 import com.heima.wemedia.service.WmNewsAutoScanService;
-import com.heima.wemedia.service.WmNewsService;
-import com.heima.wemedia.service.WmUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -26,7 +25,7 @@ import java.util.Date;
 public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
 
     @Autowired
-    WmNewsMapper wmNewsMapper;
+    private WmNewsMapper wmNewsMapper;
     @Autowired
     private WmUserMapper wmUserMapper;
     @Autowired
@@ -35,7 +34,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
     private IArticleClient articleClient;
 
     /**
-     * To comment
+     * 审核内容并上架
      */
     @Override
     @Async
@@ -76,7 +75,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
             dto.setChannelName(channel.getName());
         }
 
-        dto.setCreateTime(new Date());
+        dto.setCreatedTime(new Date());
 
         if (wmNews.getArticleId() != null) {
             dto.setId(wmNews.getArticleId());

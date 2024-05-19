@@ -4,7 +4,7 @@ package com.heima.wemedia.service;
 public interface WmNewsAutoScanService {
 
     /**
-     * To comment
+     * 内容审核
      */
     public void autoScanWmNews(Integer articleId);
 }

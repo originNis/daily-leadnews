@@ -137,7 +137,7 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         // 保存封面图片
         saveRelationInfoForCover(wmNewsDto, news, materialUrls);
 
-        wmNewsAutoScanService.autoScanWmNews(wmNewsDto.getId());
+        wmNewsAutoScanService.autoScanWmNews(news.getId());
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
