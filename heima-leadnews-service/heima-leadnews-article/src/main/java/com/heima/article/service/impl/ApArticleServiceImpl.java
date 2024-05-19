@@ -6,6 +6,7 @@ import com.heima.article.mapper.ApArticleConfigMapper;
 import com.heima.article.mapper.ApArticleContentMapper;
 import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.service.ApArticleService;
+import com.heima.article.service.ArticleFreemarkerService;
 import com.heima.common.constants.ArticleConstants;
 import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
@@ -35,6 +36,8 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
     ApArticleConfigMapper apArticleConfigMapper;
     @Autowired
     ApArticleContentMapper apArticleContentMapper;
+    @Autowired
+    ArticleFreemarkerService articleFreemarkerService;
 
     /**
      * 加载文章列表
@@ -113,6 +116,9 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
             content.setContent(dto.getContent());
             apArticleContentMapper.updateById(content);
         }
+
+        // 3. 生成静态页面并存储URL到数据库
+        articleFreemarkerService.buildArticleToMinio(article, dto.getContent());
 
         return ResponseResult.okResult(article.getId());
     }
