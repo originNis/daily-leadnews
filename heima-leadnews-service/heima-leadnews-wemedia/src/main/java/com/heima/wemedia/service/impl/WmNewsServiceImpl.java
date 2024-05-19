@@ -158,9 +158,9 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
                 news.setType(WemediaConstants.WM_NEWS_NONE_IMAGE);
             }
 
-            //if (images != null || images.size() > 0) {
-            //   news.setImages(images);
-            //}
+//            if (images != null || images.size() > 0) {
+//               news.setImages(images);
+//            }
 
             updateById(news);
         }
