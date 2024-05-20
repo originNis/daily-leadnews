@@ -99,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
     public boolean cancelTask(Long taskId) {
         boolean flag = false;
 
-        Task task = upadateDb(taskId);
+        Task task = upadateDb(taskId, ScheduleConstants.CANCELLED);
 
         if (task != null) {
             removeTaskFromCache(task);
