@@ -1,6 +1,5 @@
 package com.heima.wemedia.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.heima.apis.article.IArticleClient;
 import com.heima.model.common.dtos.ResponseResult;
