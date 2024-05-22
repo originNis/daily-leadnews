@@ -11,13 +11,18 @@ import com.heima.schedule.mapper.TaskinfoMapper;
 import com.heima.schedule.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: Rybin
@@ -29,6 +34,8 @@ import java.util.Date;
 @Slf4j
 public class TaskServiceImpl implements TaskService {
 
+    @Autowired
+    RedissonClient redissonClient;
     @Autowired
     CacheService cacheService;
     @Autowired
@@ -154,5 +161,38 @@ public class TaskServiceImpl implements TaskService {
         }
 
         return task;
+    }
+
+    /**
+     * 定时刷新任务
+     */
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void refresh() {
+        RLock lock = redissonClient.getLock("FUTURE_TASK_SYNC");
+        try {
+            if (lock.tryLock(5, TimeUnit.SECONDS)) {
+                log.info("=====未来数据定时刷新任务=====");
+
+                Set<String> keys = cacheService.scan(ScheduleConstants.FUTURE + "*");
+                for (String key : keys) {
+                    String newKey = ScheduleConstants.TOPIC + key.split(ScheduleConstants.FUTURE)[1];
+
+                    Set<String> currentTasks = cacheService.zRange(key, 0, System.currentTimeMillis());
+
+                    if (!currentTasks.isEmpty()) {
+                        cacheService.refreshWithPipeline(key, newKey, currentTasks);
+                        log.info("成功刷新" + newKey);
+                    }
+                }
+            } else {
+                log.info("存在其他刷新任务正在访问锁");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("未来数据定时刷新任务获取锁失败");
+        } finally {
+            lock.unlock();
+            log.info("========刷新任务结束==========");
+        }
     }
 }
