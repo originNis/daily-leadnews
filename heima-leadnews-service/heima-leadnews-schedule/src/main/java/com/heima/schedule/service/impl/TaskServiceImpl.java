@@ -1,6 +1,7 @@
 package com.heima.schedule.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.heima.common.constants.ScheduleConstants;
 import com.heima.common.redis.CacheService;
 import com.heima.model.schedule.dtos.Task;
@@ -19,8 +20,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -56,13 +59,13 @@ public class TaskServiceImpl implements TaskService {
 
         // 2. 任务添加到redis
         if (task.getTaskId() != null) {
-            addTasksToRedis(task);
+            addTasksToCache(task);
         }
 
         return task.getTaskId();
     }
 
-    private void addTasksToRedis(Task task) {
+    private void addTasksToCache(Task task) {
         String key = task.getTaskType() + "_" + task.getPriority();
 
         Calendar calendar = Calendar.getInstance();
@@ -194,5 +197,44 @@ public class TaskServiceImpl implements TaskService {
             lock.unlock();
             log.info("========刷新任务结束==========");
         }
+    }
+
+    /**
+     * 定时从数据库获取延时任务
+     */
+    @PostConstruct
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void reloadData() {
+        log.info("========数据定时同步任务========");
+        cleanCache();
+        log.info("缓存已清除");
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 5);
+        List<Taskinfo> tasks = taskinfoMapper.selectList(Wrappers.<Taskinfo>lambdaQuery()
+                .lt(Taskinfo::getExecuteTime, calendar.getTime()));
+
+        if (tasks != null) {
+            for (Taskinfo taskinfo : tasks) {
+                Task task = new Task();
+                BeanUtils.copyProperties(taskinfo, task);
+                task.setExecuteTime(taskinfo.getExecuteTime().getTime());
+                addTasksToCache(task);
+            }
+            log.info("数据已全部同步");
+        }
+
+        log.info("========同步任务结束==========");
+    }
+
+    /**
+     * 清除关于延时任务的缓存
+     */
+    private void cleanCache() {
+        Set<String> futureTasks = cacheService.scan(ScheduleConstants.FUTURE + "*");
+        Set<String> topicTasks = cacheService.scan(ScheduleConstants.TOPIC + "*");
+
+        cacheService.delete(futureTasks);
+        cacheService.delete(topicTasks);
     }
 }
