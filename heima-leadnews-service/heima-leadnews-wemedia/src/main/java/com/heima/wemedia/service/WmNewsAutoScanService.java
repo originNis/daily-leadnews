@@ -6,5 +6,5 @@ public interface WmNewsAutoScanService {
     /**
      * 内容审核
      */
-    public void autoScanWmNews(Integer articleId);
+    public void autoScanWmNews(Integer newsId);
 }
