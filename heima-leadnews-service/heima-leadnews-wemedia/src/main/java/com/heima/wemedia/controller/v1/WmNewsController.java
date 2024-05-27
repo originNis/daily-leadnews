@@ -26,4 +26,9 @@ public class WmNewsController {
     public ResponseResult submitNews(@RequestBody WmNewsDto wmNewsDto) {
         return wmNewsService.submitNews(wmNewsDto);
     }
+
+    @PostMapping("/down_or_up")
+    public ResponseResult setEnable(@RequestBody WmNewsDto wmNewsDto) {
+        return wmNewsService.setEnable(wmNewsDto);
+    }
 }
