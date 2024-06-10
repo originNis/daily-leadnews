@@ -3,7 +3,10 @@ package com.heima.search.service.impl;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.search.dtos.UserSearchDto;
+import com.heima.model.user.pojos.ApUser;
+import com.heima.search.service.ApUserSearchService;
 import com.heima.search.service.ArticleSearchService;
+import com.heima.utils.common.AppThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -16,6 +19,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +36,8 @@ import java.util.Map;
 public class ArticleSearchServiceImpl implements ArticleSearchService {
     @Autowired
     RestHighLevelClient esClient;
+    @Autowired
+    ApUserSearchService apUserSearchService;
     /**
      * es分页搜索文章
      *
@@ -43,6 +49,11 @@ public class ArticleSearchServiceImpl implements ArticleSearchService {
         // 1.检查参数
         if (dto == null || StringUtils.isBlank(dto.getSearchWords())) {
             ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        ApUser user = AppThreadLocalUtil.get();
+        if (user != null && dto.getFromIndex() == 0) {
+            apUserSearchService.insert(dto.getSearchWords(),  user.getId());
         }
 
         // 2.设置查询条件

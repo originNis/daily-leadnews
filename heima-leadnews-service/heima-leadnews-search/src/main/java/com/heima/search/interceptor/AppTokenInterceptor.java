@@ -1,16 +1,19 @@
-package com.heima.wemedia.interceptor;
+package com.heima.search.interceptor;
 
-import com.heima.model.wemedia.pojos.WmUser;
+import com.heima.model.user.pojos.ApUser;
+import com.heima.utils.common.AppThreadLocalUtil;
 import com.heima.utils.common.WmThreadLocalUtil;
-import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
 
-public class WmTokenInterceptor implements HandlerInterceptor {
+/**
+ * @author: Rybin
+ * @description:
+ * @date: 2024/6/10
+ */
+public class AppTokenInterceptor implements HandlerInterceptor {
     /**
      * 单一线程负责处理一个请求中的控制器、拦截器等
      * 在处理控制器方法前，将userId存入ThreadLocal
@@ -24,9 +27,9 @@ public class WmTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String userId = request.getHeader("userId");
         if (userId != null) {
-            WmUser wmUser = new WmUser();
-            wmUser.setId(Integer.parseInt(userId));
-            WmThreadLocalUtil.set(wmUser);
+            ApUser apUser = new ApUser();
+            apUser.setId(Integer.parseInt(userId));
+            AppThreadLocalUtil.set(apUser);
         }
         return true;
     }
