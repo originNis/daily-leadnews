@@ -1,5 +1,7 @@
 package com.heima.search.service.impl;
 
+import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.search.pojos.ApUserSearch;
 import com.heima.search.service.ApUserSearchService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import java.util.List;
 public class ApUserSearchServiceImpl implements ApUserSearchService {
     @Autowired
     private MongoTemplate mongoTemplate;
+
     /**
      * 在数据库保存用户的搜索记录
      *
@@ -58,5 +61,19 @@ public class ApUserSearchServiceImpl implements ApUserSearchService {
         }
     }
 
+    /**
+     * 获取用户的历史搜索记录
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public ResponseResult findUserSearch(Integer userId) {
+        if (userId == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
 
+        List<ApUserSearch> search = mongoTemplate.find(new Query(Criteria.where("userId").is(userId)), ApUserSearch.class);
+        return ResponseResult.okResult(search);
+    }
 }
